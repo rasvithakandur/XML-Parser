@@ -1,0 +1,141 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>Homework 4</title>
+</head>
+<body>
+    <script type="text/javascript">
+        var xmlDoc;
+        function loadForm(url) 
+        {
+          function loadXML(url) 
+            {
+              if (window.XMLHttpRequest)
+               {
+                   // code for IE7+, Firefox, Chrome, Opera, Safari
+               
+                     xmlhttp=new XMLHttpRequest();   
+               }
+                 else
+                 {// code for IE6, IE5
+                    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");  
+                 }
+                  xmlhttp.open("GET",url,false);
+                  xmlhttp.send();
+                  xmlDoc=xmlhttp.responseXML;
+                
+             var status =xmlhttp.status;
+ 
+            if(xmlhttp.status=='404') 
+            { 
+                alert("Requested XML not found."); 
+                return null; 
+            }
+            xmlDoc=xmlhttp.responseXML;
+            if(xmlDoc==null)
+            { 
+                alert("Error Parsing the XML document");
+                return;
+            }
+            if(xmlDoc.documentElement.tagName=="parsererror"){
+                alert("Error Parsing the XML document");
+                return;
+            }
+
+            if(xmlDoc.getElementsByTagName("Row").length==0/*||xmlDoc.getElementsByTagName("Row")[0].children.length==0*/)
+            {
+                alert("The XML document has 0 rows to display.");
+                return;
+            }
+                  return xmlDoc;   
+            }
+               
+                  xmlDoc = loadXML(url);
+                 if (window.ActiveXObject) //if IE, simply execute script (due to async prop).
+                 { 
+                     if (xmlDoc.parseError.errorCode != 0) 
+                     {
+                         var myErr = xmlDoc.parseError;
+                         generateError(xmlDoc);
+                         hWin = window.open("", "Error", "height=300,width=800,scrollbars=yes");
+                         hWin.document.write(html_text);
+                     } 
+                     else 
+                     {  
+                        generateHTML(xmlDoc);
+                        hWin = window.open("", "Homework-4", "height=800,width=800,scrollbars=yes");
+                        hWin.document.write(html_text);   
+                     }
+                 }
+                  else //else if FF, execute script once XML object has loaded
+                 { 
+                    xmlDoc.onload=generateHTML(xmlDoc);
+                    hWin = window.open("", "Homework-4", "height=800,width=800,scrollbars=yes");
+                    hWin.document.write(html_text);  
+                 }
+                    hWin.document.close();
+        }
+        function  generateHTML(xmlDoc)
+        {
+            html_text="<html><body><table border='1'>";
+            html_text+="<tr>";
+			     childLen=xmlDoc.getElementsByTagName("Header").item(0).children.length;
+            for(i=0;i<childLen;i++)
+                html_text += "<th>"+xmlDoc.getElementsByTagName("Header").item(0).children[i].firstChild.nodeValue+"</th>";
+            html_text+="</tr>";
+         
+            // for row
+            
+            rowLen=xmlDoc.getElementsByTagName("Row").length;
+            for (i=0;i<rowLen;i++)
+                {
+                html_text+="<tr>";
+                rowChildLen=xmlDoc.getElementsByTagName("Row").item(i).children.length;
+                    for (j=0;j<rowChildLen;j++)
+                        {
+                            if (xmlDoc.getElementsByTagName("Row").item(i).children[j].nodeName=="HomePage")
+                                {
+                                    html_text+="<td><a href="+xmlDoc.getElementsByTagName("Row").item(i).children[j].firstChild.nodeValue+">"+xmlDoc.getElementsByTagName("Row").item(i).children[j].firstChild.nodeValue+"</a></td>";
+                                }
+                           else if (xmlDoc.getElementsByTagName("Row").item(i).children[j].nodeName=="Logo")
+                                {
+                                    html_text+="<td><img src="+xmlDoc.getElementsByTagName("Row").item(i).children[j].firstChild.nodeValue+"></img></td>";
+                                }
+                         else if (xmlDoc.getElementsByTagName("Row").item(i).children[j].nodeName=="Location")
+                             {
+                             html_text+="<td><ul>";
+                                for (k=0;k<2;k++)
+                                    {
+                                    if(xmlDoc.getElementsByTagName("Row").item(i).children[j].children[k].firstChild==null)
+                                    html_text+="<li></li>";
+                                    else if (xmlDoc.getElementsByTagName("Row").item(i).children[j].children[k].firstChild.nodeValue.match("/^\s+$/"))
+                                    html_text+="<li></li>";
+                                    else
+                                    html_text+="<li>"+xmlDoc.getElementsByTagName("Row").item(i).children[j].children[k].firstChild.nodeValue+"</li>";
+                                    }
+                            html_text+="</td></ul>";
+                             }
+                        else
+                                html_text+="<td>"+xmlDoc.getElementsByTagName("Row").item(i).children[j].firstChild.nodeValue+"</td>";
+                             
+                        }
+                html_text+="</tr>";
+                }
+               html_text+="</table></body></html>";
+        }
+        
+    </script>
+<center>
+<div id="form_holder" style="width:200;align=center;">
+<form>
+    <br>
+    Enter URL for Newspaper List XML file:<br><br>
+    <input id="url" type="text" name="URL" value="" style="width:300px">
+    <br><br>
+    <input type="submit" value="Submit Query" onclick='loadForm(URL.value)'>
+</form>
+</div>
+</center>
+    <noscript></noscript>
+</body>
+</html>
